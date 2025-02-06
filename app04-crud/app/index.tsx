@@ -2,15 +2,20 @@ import {
   ActivityIndicator,
   FlatList,
   Pressable,
-  SafeAreaView,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native";
 import { data } from "@/data/todos";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+
+import { Inter_500Medium, useFonts } from "@expo-google-fonts/inter";
+import { ThemeContext, ThemeProvider } from "@/context/ThemeContext";
+
+import Octicons from "@expo/vector-icons/Octicons";
 
 interface ITodo {
   id: number;
@@ -32,6 +37,10 @@ export default function Index() {
   const [todo, setTodo] = useState<ITodo[]>([]);
   const [text, setText] = useState("");
 
+  const [loaded, error] = useFonts({ Inter_500Medium });
+
+  // const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
+
   useEffect(() => {
     const loadTodo = async () => await setTodo(data.sort((a, b) => -1));
 
@@ -39,6 +48,8 @@ export default function Index() {
 
     setLoading(false);
   }, []);
+
+  if (!loaded && !error) return null;
 
   const toggleTodo = (todoId: number) => {
     setTodo(
@@ -60,48 +71,72 @@ export default function Index() {
   if (isLoading) return <LoadingSpinner />;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Add a new todo"
-          placeholderTextColor="gray"
-          value={text}
-          onChangeText={setText}
-        />
-        <Pressable onPress={addTodo} style={styles.addButton}>
-          <Text style={styles.addButtonText}>Add</Text>
-        </Pressable>
-      </View>
+    <ThemeProvider>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Add a new todo"
+            placeholderTextColor="gray"
+            value={text}
+            onChangeText={setText}
+          />
+          <Pressable onPress={addTodo} style={styles.addButton}>
+            <Text style={styles.addButtonText}>Add</Text>
+          </Pressable>
+          {/* <Pressable
+            onPress={() =>
+              setColorScheme(colorScheme === "dark" ? "light" : "dark")
+            }
+          ></Pressable> */}
+        </View>
 
-      <FlatList
-        data={todo}
-        keyExtractor={(todo) => todo.id.toString()}
-        renderItem={({ item }) => {
-          return (
-            <View style={styles.todoItem}>
-              <Text
-                style={[
-                  styles.todoText,
-                  item.completed && styles.completedText,
-                ]}
-                onPress={() => toggleTodo(item.id)}
-              >
-                {item.title}
-              </Text>
-              <Pressable onPress={() => removeTodo(item.id)}>
-                <MaterialCommunityIcons
-                  name="delete-circle"
-                  size={36}
-                  color="red"
-                  selectable={undefined}
-                />
-              </Pressable>
-            </View>
-          );
-        }}
-      />
-    </SafeAreaView>
+        <FlatList
+          data={todo}
+          keyExtractor={(todo) => todo.id.toString()}
+          renderItem={({ item }) => {
+            return (
+              <View style={styles.todoItem}>
+                <Text
+                  style={[
+                    styles.todoText,
+                    item.completed && styles.completedText,
+                  ]}
+                  onPress={() => toggleTodo(item.id)}
+                >
+                  {item.title}
+                </Text>
+                {/* <Pressable onPress={() => removeTodo(item.id)}>
+                  <MaterialCommunityIcons
+                    name="delete-circle"
+                    size={36}
+                    color="red"
+                    selectable={undefined}
+                  />
+                  {colorScheme === "dark" ? (
+                    <Octicons
+                      name="moon"
+                      size={36}
+                      selectable={undefined}
+                      color={theme.text}
+                      style={{ width: 36 }}
+                    />
+                  ) : (
+                    <Octicons
+                      name="moon"
+                      size={36}
+                      selectable={undefined}
+                      color={theme.text}
+                      style={{ width: 36 }}
+                    />
+                  )}
+                </Pressable> */}
+              </View>
+            );
+          }}
+        />
+      </SafeAreaView>
+    </ThemeProvider>
   );
 }
 
@@ -133,6 +168,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginRight: 10,
     fontSize: 18,
+    fontFamily: "Inter_500Medium",
     minWidth: 0,
     color: "white",
   },
@@ -161,6 +197,7 @@ const styles = StyleSheet.create({
   todoText: {
     flex: 1,
     fontSize: 18,
+    fontFamily: "Inter_500Medium",
     color: "white",
   },
   completedText: {
