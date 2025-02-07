@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
+    "owner": "kira",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -25,11 +26,11 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
+      "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",
+      ["expo-router", { "origin": "https://uber.com/" }],
       [
         "expo-splash-screen",
         {

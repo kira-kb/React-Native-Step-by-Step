@@ -9,6 +9,7 @@ import OAuth from "../../components/OAuth";
 import ReactNativeModal from "react-native-modal";
 
 import { useSignUp } from "@clerk/clerk-expo";
+import { fetchAPI } from "../lib/fetch";
 
 export default function SignUp() {
   const [form, setForm] = useState({
@@ -16,6 +17,8 @@ export default function SignUp() {
     email: "",
     password: "",
   });
+
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const [verification, setVerification] = useState({
     state: "default",
@@ -62,6 +65,17 @@ export default function SignUp() {
       // and redirect the user
       if (signUpAttempt.status === "complete") {
         // TODO: create user database
+
+        const save = await fetchAPI("/(api)/user", {
+          method: "POST",
+          body: JSON.stringify({
+            name: form.name,
+            email: form.email,
+            clerkId: signUpAttempt.createdUserId,
+          }),
+        });
+
+        console.log("saver:**  ", save);
 
         await setActive({ session: signUpAttempt.createdSessionId });
         setVerification({ ...verification, state: "success" });
@@ -138,9 +152,9 @@ export default function SignUp() {
 
         <ReactNativeModal
           isVisible={verification.state === "pending"}
-          onModalHide={() =>
-            setVerification({ ...verification, state: "success" })
-          }
+          onModalHide={() => {
+            if (verification.state === "success") setShowSuccessModal(true);
+          }}
         >
           <View className="bg-white px-7 py-9 rounded-2xl min-h[300px]">
             <Text className="text-2xl font-JakartaExtraBold mb-2">
@@ -176,7 +190,7 @@ export default function SignUp() {
           </View>
         </ReactNativeModal>
 
-        <ReactNativeModal isVisible={verification.state === "success"}>
+        <ReactNativeModal isVisible={showSuccessModal}>
           <View className="bg-white px-7 py-9 rounded-2xl min-h[300px]">
             <Image
               source={images.check}
@@ -193,7 +207,10 @@ export default function SignUp() {
             <CustomButton
               title="Browse Home"
               className="mt-5"
-              onPress={() => router.replace("/(root)/(tabs)/home")}
+              onPress={() => {
+                setShowSuccessModal(false);
+                router.push("/(root)/(tabs)/home");
+              }}
             />
           </View>
         </ReactNativeModal>
