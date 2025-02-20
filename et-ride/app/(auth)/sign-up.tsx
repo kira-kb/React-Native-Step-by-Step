@@ -9,7 +9,7 @@ import OAuth from "../../components/OAuth";
 import ReactNativeModal from "react-native-modal";
 
 import { useSignUp } from "@clerk/clerk-expo";
-import { fetchAPI } from "../lib/fetch";
+import { fetchAPI } from "../../lib/fetch";
 
 export default function SignUp() {
   const [form, setForm] = useState({

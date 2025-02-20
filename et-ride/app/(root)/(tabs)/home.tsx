@@ -1,9 +1,22 @@
+import { icons, images } from "../../../constants";
 import RideCard from "../../../components/rideCard";
-import CustomButton from "../../../components/CustomButton";
-import { SignedIn, SignedOut, useUser, useAuth } from "@clerk/clerk-expo";
-import { Link, router } from "expo-router";
-import { FlatList, Text } from "react-native";
+import GoogleTextInput from "../../../components/GoogleTextInput";
+import { useAuth, useUser } from "@clerk/clerk-expo";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
+import Map from "../../../components/Map";
+import { useLocationStore } from "../../../store";
+import { useEffect, useState } from "react";
+import * as Location from "expo-location";
+import OSMTextInput from "@/components/OSMTextInput";
 
 const recentRides = [
   {
@@ -113,10 +126,18 @@ const recentRides = [
 ];
 
 export default function Page() {
+  const { setUserLocation, setDestinationLocation } = useLocationStore();
+
   const { user } = useUser();
+  // console.log(user);
   const { signOut } = useAuth();
 
-  const onLogOutPress = async () => {
+  // const loading = false;
+
+  const [hasPermissions, setHasPermissions] = useState(false);
+
+  const handleDestinationPress = () => {};
+  const handleSignOut = async () => {
     try {
       await signOut();
 
@@ -126,25 +147,155 @@ export default function Page() {
     }
   };
 
+  // useEffect(() => {
+  //   const requestLocation = async () => {
+  //     const { status } = await Location.requestForegroundPermissionsAsync();
+
+  //     if (status !== "granted") {
+  //       setHasPermissions(false);
+  //       return;
+  //     }
+
+  //     if (!hasPermissions) return;
+
+  //     const location = await Location.getCurrentPositionAsync();
+
+  //     const address = await Location.reverseGeocodeAsync({
+  //       latitude: location.coords?.latitude!,
+  //       longitude: location.coords?.longitude!,
+  //     });
+
+  //     console.log("coords:**  ", location.coords);
+  //     console.log("address:**  ", address);
+
+  //     setUserLocation({
+  //       latitude: location.coords.latitude,
+  //       longitude: location.coords.longitude,
+  //       address: `${address[0]?.name}, ${address[0]?.region}`,
+  //     });
+  //   };
+
+  //   requestLocation();
+  // }, []);
+
+  const [loading, setLoaing] = useState(true);
+
+  useEffect(() => {
+    const requestLocation = async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        setHasPermissions(false);
+        return;
+      }
+
+      // If permission is granted, set `hasPermissions` to true
+      setHasPermissions(true);
+
+      if (!hasPermissions) return;
+
+      const location = await Location.getCurrentPositionAsync();
+
+      const address = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+
+      // console.log("coords:**  ", location.coords);
+      // console.log("address:**  ", address);
+
+      setUserLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        address: `${address[0]?.name}, ${address[0]?.region}`,
+      });
+
+      setLoaing(false);
+    };
+
+    requestLocation();
+  }, [hasPermissions]); // Depend on `hasPermissions`
+
   return (
     <SafeAreaView className="bg-general-500">
       <FlatList
-        data={recentRides?.slice(0, 5)}
+        data={recentRides.length > 0 ? recentRides?.slice(0, 5) : []}
         renderItem={({ item }) => <RideCard ride={item} />}
-      />
-      {/* <SignedIn>
-        <Text>Hello {user?.emailAddresses[0].emailAddress}</Text>
+        className="px-5"
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          paddingBottom: 100,
+        }}
+        ListEmptyComponent={() => (
+          <View className="flex flex-col items-center justify-center">
+            {!loading ? (
+              <>
+                <Image
+                  source={images.noResult}
+                  className="w-40 h-40"
+                  alt="No recent rides found"
+                  resizeMode="contain"
+                />
+                <Text className="text-sm">No recent rides found</Text>
+              </>
+            ) : (
+              <ActivityIndicator size="small" color="#333" />
+            )}
+          </View>
+        )}
+        ListHeaderComponent={() => (
+          <>
+            <View className="flex flex-row items-center justify-between my-5">
+              {/* <Text className="font-JakartaExtraBold text-2xl capitalize">
+                Welcome{",  "}
+                {user?.firstName ||
+                  user?.emailAddresses[0].emailAddress.split("@")[0]}{" "}
+                👋
+              </Text> */}
+              <Text className="font-JakartaExtraBold text-2xl capitalize">
+                Welcome{",  "}
+                {user?.firstName ||
+                  (user?.emailAddresses &&
+                    user?.emailAddresses[0]?.emailAddress.split("@")[0]) ||
+                  "Guest"}{" "}
+                👋
+              </Text>
 
-        <CustomButton title="Log Out" onPress={onLogOutPress} />
-      </SignedIn>
-      <SignedOut>
-        <Link href="/(auth)/sign-in">
-          <Text>Sign in</Text>
-        </Link>
-        <Link href="/(auth)/sign-up">
-          <Text>Sign up</Text>
-        </Link>
-      </SignedOut> */}
+              <TouchableOpacity
+                onPress={handleSignOut}
+                className="justify-center items-center w-10 h-10 rounded-full bg-white"
+              >
+                <Image source={icons.out} className="w-4 h-4" />
+              </TouchableOpacity>
+            </View>
+
+            {/* <GoogleTextInput
+              icon={icons.search}
+              containerStyle="bg-white shadow=md shadow-neutral-300"
+              handlePress={handleDestinationPress}
+            /> */}
+
+            <OSMTextInput
+              // icon={icons.search}
+              containerStyle="bg-white shadow=md shadow-neutral-300"
+              handlePress={handleDestinationPress}
+            />
+
+            <>
+              <Text className="text-xl font-JakartaBold mt-5 mb-3">
+                Your Current Location
+              </Text>
+              <View className="flex flex-row items-center w-full bg-transparent h-[250px]">
+                {!loading && <Map />}
+              </View>
+            </>
+
+            <Text className="text-xl font-JakartaBold mt-5 mb-3">
+              Ricent Rides
+            </Text>
+          </>
+        )}
+      />
     </SafeAreaView>
   );
 }
