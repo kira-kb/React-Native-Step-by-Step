@@ -116,8 +116,6 @@ export default function BingoLayout({
     setBNPlaceholder((prevNumbers) => {
       const updatedNumbers = [...prevNumbers];
       updatedNumbers[column][row] = value;
-      console.log(value);
-      console.log(updatedNumbers);
       return updatedNumbers;
     });
   };
@@ -126,7 +124,6 @@ export default function BingoLayout({
     setBingoNumbers(BNPlaceholder);
     setModal(false);
   };
-  // ? /////////////////////////////////////////////////////////////////////
 
   // Use effect to check for patterns whenever selectedCells changes
   useEffect(() => {
@@ -134,22 +131,23 @@ export default function BingoLayout({
   }, [selectedCells]);
 
   return (
-    <View className="flex items-center justify-center my-5 ">
+    <View className="flex items-center justify-center mt-2 ">
       {/* Display Pattern Count */}
-      <View className="flex flex-col items-center justify-center mb-4">
+      <View className="flex flex-row items-center justify-center mb-1 gap-2">
         <Text className="text-2xl font-bold dark:text-slate-200">
-          Pattern Count: <Text className="text-red-600">{patternCount}</Text>
+          Pattern: <Text className="text-red-600">{patternCount}</Text>
         </Text>
-        <Button title="Add Card" onPress={() => setModal(true)} />
+        <Button title="Add" onPress={() => setModal(true)} />
+        <Button title="Reset" onPress={resetGame} />
       </View>
 
       {/* Render BINGO letters and change color to red when pattern count is fulfilled */}
-      <View className="flex flex-col items-center mb-4">
+      <View className="flex flex-col items-center mb-1">
         <View className="flex flex-row">
           {BINGO_COLUMNS.map((letter, index) => (
             <View
               key={index}
-              className={`w-16 h-16 justify-center items-center border border-gray-600 ${
+              className={`w-10 h-10 justify-center items-center border border-gray-600 ${
                 patternCount >= patternsToCheck ? "bg-red-500" : "bg-slate-300"
               }`}
             >
@@ -175,7 +173,7 @@ export default function BingoLayout({
                   <Pressable
                     key={rowIndex}
                     onPress={() => handleCellPress(colIndex, rowIndex)}
-                    className={`w-16 h-16 justify-center items-center border ${
+                    className={`w-10 h-10 justify-center items-center border ${
                       number === "Free"
                         ? "bg-yellow-300"
                         : isSelected
@@ -183,7 +181,7 @@ export default function BingoLayout({
                           : "bg-slate-100"
                     } ${
                       isInMatchedPattern ? "border-red-600" : "border-gray-600"
-                    }`}
+                    } `}
                   >
                     <Text className="text-lg">{number}</Text>
                   </Pressable>
@@ -193,42 +191,9 @@ export default function BingoLayout({
           ))}
         </View>
       </View>
-      {/* <View className="flex flex-col items-center mb-1">
-        <View className="flex flex-row">
-          {BINGO_NUMBERS.map((column, colIndex) => (
-            <View key={colIndex} className="flex flex-col items-center">
-              {column.map((number, rowIndex) => {
-                const cellKey = `${colIndex}-${rowIndex}`;
-                const isSelected = selectedCells.includes(cellKey);
-                const isInMatchedPattern = matchedPatterns.some((pattern) =>
-                  pattern.includes(colIndex * 5 + rowIndex)
-                );
-
-                return (
-                  <Pressable
-                    key={rowIndex}
-                    onPress={() => handleCellPress(colIndex, rowIndex)}
-                    className={`w-16 h-16 justify-center items-center border ${
-                      number === "Free"
-                        ? "bg-yellow-300"
-                        : isSelected
-                          ? "bg-blue-400"
-                          : "bg-slate-100"
-                    } ${
-                      isInMatchedPattern ? "border-red-600" : "border-gray-600"
-                    }`}
-                  >
-                    <Text className="text-lg">{number}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          ))}
-        </View>
-      </View> */}
 
       {/* Reset Button */}
-      <Button title="Reset Game" onPress={resetGame} />
+      {/* <Button title="Reset Game" onPress={resetGame} /> */}
 
       <ReactNativeModal
         isVisible={modal}
@@ -256,7 +221,7 @@ export default function BingoLayout({
                     value={
                       rowIndex === 2 && colIndex === 2
                         ? "⭐"
-                        : BINGO_NUMBERS[rowIndex][colIndex].toString()
+                        : BNPlaceholder[colIndex][rowIndex].toString()
                     }
                     onChangeText={(text) =>
                       handleNumberChange(colIndex, rowIndex, text)
