@@ -8,7 +8,7 @@
     "scheme": "myapp",
     "splash": {
       "image": "./assets/images/icon.png",
-      // "imageWidth": 600,
+      "imageWidth": 600,
       "resizeMode": "contain",
       "backgroundColor": "#333333"
     },
@@ -34,8 +34,8 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/icons.png",
-          "imageWidth": 800,
+          "image": "./assets/images/icon.png",
+          "imageWidth": 1000,
           "resizeMode": "cover",
           "backgroundColor": "#ffffff"
         }
