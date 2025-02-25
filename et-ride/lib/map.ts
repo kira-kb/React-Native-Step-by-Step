@@ -38,7 +38,7 @@ export const calculateRegion = ({
   // console.log("map lat", userLatitude);
   // console.log("map log", userLongitude);
 
-  // //////// TODO? Remove this return object
+  // ? //////// TODO? Remove this return object
   // return {
   //   latitude: "37.78825",
   //   longitude: "-122.4324",

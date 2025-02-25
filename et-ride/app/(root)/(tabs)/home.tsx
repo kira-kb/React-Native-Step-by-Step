@@ -1,6 +1,6 @@
 import { icons, images } from "../../../constants";
 import RideCard from "../../../components/rideCard";
-import GoogleTextInput from "../../../components/GoogleTextInput";
+// import GoogleTextInput from "../../../components/GoogleTextInput";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import {
   ActivityIndicator,
@@ -16,7 +16,7 @@ import Map from "../../../components/Map";
 import { useLocationStore } from "../../../store";
 import { useEffect, useState } from "react";
 import * as Location from "expo-location";
-import OSMTextInput from "@/components/OSMTextInput";
+import OSMTextInput from "../../../components/OSMTextInput";
 
 const recentRides = [
   {
@@ -136,7 +136,16 @@ export default function Page() {
 
   const [hasPermissions, setHasPermissions] = useState(false);
 
-  const handleDestinationPress = () => {};
+  const handleDestinationPress = (location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  }) => {
+    setDestinationLocation(location);
+
+    router.push("/(root)/find-ride");
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -146,37 +155,6 @@ export default function Page() {
       console.log(err);
     }
   };
-
-  // useEffect(() => {
-  //   const requestLocation = async () => {
-  //     const { status } = await Location.requestForegroundPermissionsAsync();
-
-  //     if (status !== "granted") {
-  //       setHasPermissions(false);
-  //       return;
-  //     }
-
-  //     if (!hasPermissions) return;
-
-  //     const location = await Location.getCurrentPositionAsync();
-
-  //     const address = await Location.reverseGeocodeAsync({
-  //       latitude: location.coords?.latitude!,
-  //       longitude: location.coords?.longitude!,
-  //     });
-
-  //     console.log("coords:**  ", location.coords);
-  //     console.log("address:**  ", address);
-
-  //     setUserLocation({
-  //       latitude: location.coords.latitude,
-  //       longitude: location.coords.longitude,
-  //       address: `${address[0]?.name}, ${address[0]?.region}`,
-  //     });
-  //   };
-
-  //   requestLocation();
-  // }, []);
 
   const [loading, setLoaing] = useState(true);
 
@@ -191,6 +169,8 @@ export default function Page() {
 
       // If permission is granted, set `hasPermissions` to true
       setHasPermissions(true);
+
+      // console.log("haspermissions:  ", hasPermissions);
 
       if (!hasPermissions) return;
 
@@ -207,7 +187,8 @@ export default function Page() {
       setUserLocation({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-        address: `${address[0]?.name}, ${address[0]?.region}`,
+        // address: `${address[0]?.name}, ${address[0]?.region}`,
+        address: `${address[0]?.city}, ${address[0]?.region}`,
       });
 
       setLoaing(false);
@@ -276,7 +257,7 @@ export default function Page() {
             /> */}
 
             <OSMTextInput
-              // icon={icons.search}
+              icon={icons.search}
               containerStyle="bg-white shadow=md shadow-neutral-300"
               handlePress={handleDestinationPress}
             />
